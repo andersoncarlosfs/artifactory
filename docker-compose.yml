@@ -1,0 +1,38 @@
+version: '3'
+  
+secrets:
+  artifactory_user:
+    file: ./secrets/artifactory/user
+  artifactory_password:
+    file: ./secrets/artifactory/password 
+    
+volumes:
+  logs:
+
+services:
+  python:
+    image: python
+    build:
+      context: ./images
+      args:
+        CONDA_VERSION: latest
+
+  project:
+    image: project
+    depends_on:
+      - python
+    #dns_search:
+    #  - 
+    build:
+      context: ./
+      args:
+        IMAGE_NAME: python
+        ARTIFACTORY_HOST:
+        ARTIFACTORY_CONDA_REPOSITORY:
+        ARTIFACTORY_PYPI_REPOSITORY:
+      secrets:
+        - artifactory_user
+        - artifactory_password
+    cap_add:
+      - SYS_ADMIN       # Adding administrators privileges to the container
+      - DAC_READ_SEARCH # Adding standard permissions to the container
